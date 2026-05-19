@@ -91,7 +91,7 @@ resource "aws_glue_job" "mongodb_ingest" {
   }
 
   default_arguments = {
-    "--S3_INPUT_PATH"                    = "s3://glue-source-may-18/data/"
+    "--S3_INPUT_PATH"                    = "s3://glue-source-may-18/data/simulated/"
     "--MONGO_URI"                        = local.mongo_uri
     "--extra-jars"                       = "s3://glue-source-may-18/jars/mongo-spark-connector.jar"
     "--job-language"                     = "python"

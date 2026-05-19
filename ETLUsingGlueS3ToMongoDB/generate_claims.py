@@ -117,14 +117,20 @@ HEADERS = list(make_row(0, 0).keys())
 
 s3 = boto3.client("s3", region_name="us-east-1")
 claim_counter = 2000000  # start after existing CLM001xxxxxx range
+EXISTING_ID_RANGE = (1, 1999999)  # IDs already in MongoDB
 
 for file_idx in range(1, NUM_FILES + 1):
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=HEADERS)
     writer.writeheader()
     for _ in range(ROWS_PER_FILE):
-        writer.writerow(make_row(claim_counter, file_idx))
-        claim_counter += 1
+        # ~30% chance to reuse an existing ID (update), else new ID (insert)
+        if random.random() < 0.3:
+            claim_num = random.randint(*EXISTING_ID_RANGE)
+        else:
+            claim_num = claim_counter
+            claim_counter += 1
+        writer.writerow(make_row(claim_num, file_idx))
 
     key = f"{PREFIX}claims_sim_{file_idx:04d}.csv"
     s3.put_object(Bucket=BUCKET, Key=key, Body=buf.getvalue())
